@@ -18,3 +18,18 @@ function findParent($node,$root,condition) {
 	}
 	return null
 }
+
+function arrayWatch(callback) {
+    var arrayMethods = [];
+    ['pop','push'].forEach(function(method){
+        var original = Array.prototype[method];
+        arrayMethods[method] = function() {
+            // this 指向可通过下面的测试看出
+            var result = original.apply(this, arguments)
+            callback(result)
+            return result
+        };
+    })
+    return arrayMethods
+}
+

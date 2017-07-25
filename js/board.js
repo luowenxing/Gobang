@@ -24,7 +24,7 @@
 		return null
 	}
 
-	Board.prototype.setpOff = function(x,y) {
+	Board.prototype.stepOff = function(x,y) {
 		this.map[x][y] = null
 		return 
 	}
