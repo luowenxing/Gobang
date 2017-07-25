@@ -1,0 +1,13 @@
+.map {
+	border-collapse: collapse;
+    margin: 0 auto;
+    line-height: 29px;
+}
+.map tr {
+	height: 32px;
+}
+.map tr td {
+	width: 29px;
+    border: 1px solid #DFDFDF;
+    text-align: center;
+}
