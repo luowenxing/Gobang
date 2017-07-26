@@ -16,6 +16,12 @@
 		}
 	}
 
+    // 清空棋盘
+    Board.prototype.clear = function() {
+        Board.call(this,this.size)
+    }
+
+    // 在某一点落子
 	Board.prototype.stepOn = function(piece) {
 		var x = piece.x,y = piece.y
 		if(!this.map[x][y]) {
@@ -25,11 +31,13 @@
 		return null
 	}
 
+    // 取消某一点的落子(悔棋)
 	Board.prototype.stepOff = function(piece) {
 		this.map[piece.x][piece.y] = null
 		return 
 	}
 
+    // 判断是否赢棋，落子时判断
 	Board.prototype.checkWin = function(piece) {
 		var x = piece.x,y = piece.y,
 			originX = x,originY = y,
@@ -75,6 +83,7 @@
 		return isWin
 	}
 
+    // 添加赢棋提示
 	Board.prototype.addWinIndications = function(piece,detectWinRange) {
 		var size = detectWinRange.length - 4,
 			map = this.map,matchedCount = 0,freePosition = null

@@ -10,11 +10,13 @@
         this._init()
     }
 
+    // 初始化游戏
     GameRenderer.prototype._init = function() {
         this._initControl()
         this._initBoard()
     }
 
+    // 初始化棋盘
     GameRenderer.prototype._initBoard = function() {
         // 创建棋盘
         var $table = $c('table'),
@@ -48,18 +50,23 @@
         this.$table = $table
     }   
 
+    // 初始化控制台
     GameRenderer.prototype._initControl = function() {
         var $ctlPanel = $c('div'),
             $btnStepOff = $c('button'),
             $btnRegretStepOff = $c('button'),
+            $btnRestart = $c('button')
             game = this.game    
         $ctlPanel.className = 'control-panel'
         $btnStepOff.className = 'btn-stepoff'
         $btnRegretStepOff.className = 'btn-regret-stepoff'
         $btnStepOff.innerHTML = '悔棋'
         $btnRegretStepOff.innerHTML = '撤销悔棋'
+        $btnRestart.innerHTML = '重新开始'
+        $ctlPanel.appendChild($btnRestart)
         $ctlPanel.appendChild($btnStepOff)
         $ctlPanel.appendChild($btnRegretStepOff)
+        $btnRestart.addEventListener('click',game.restart.bind(game))
         $btnStepOff.addEventListener('click',game.stepOff.bind(game))
         $btnRegretStepOff.addEventListener('click',game.regretStepOff.bind(game))
         this.$el.appendChild($ctlPanel)
@@ -67,6 +74,14 @@
         this.$btnRegretStepOff = $btnRegretStepOff
         this.$btnStepOff.style.visibility = 'hidden'
         this.$btnRegretStepOff.style.visibility = 'hidden'
+    }
+
+    // 清空棋盘DOM
+    GameRenderer.prototype.clear = function() {
+        this.$tds.forEach(function($td) {
+            $td.innerHTML = ''
+            $td.className = ''
+        })
     }
 
     // 渲染游戏控制界面
