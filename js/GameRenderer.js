@@ -5,13 +5,14 @@
     function GameRenderer(game,$el) {
         this.game = game
         this.$el = $el
+        this.$prevIndications = []
+        this.$tds = []
         this._init()
     }
 
     GameRenderer.prototype._init = function() {
         this._initControl()
         this._initBoard()
-        
     }
 
     GameRenderer.prototype._initBoard = function() {
@@ -42,7 +43,9 @@
                 game.stepOn(x,y,true)
             }
         })
+        $table.classList.add('black-turn')
         this.$el.appendChild($table)
+        this.$table = $table
     }   
 
     GameRenderer.prototype._initControl = function() {
@@ -62,34 +65,56 @@
         this.$el.appendChild($ctlPanel)
         this.$btnStepOff = $btnStepOff
         this.$btnRegretStepOff = $btnRegretStepOff
-        this.reRenderControl()
-
+        this.$btnStepOff.style.visibility = 'hidden'
+        this.$btnRegretStepOff.style.visibility = 'hidden'
     }
 
-    // UI渲染层，主要实现DOM渲染和监听点击事件
+    // 渲染游戏控制界面
     GameRenderer.prototype.reRenderControl = function() {
         var game = this.game,
-            btnStepOffVisible = game.steps.length > 0 ? 'visible' : 'hidden',
-            btnRegretStepOffVisible = game.regretSteps.length > 0 ? 'visible' : 'hidden'  
+            btnStepOffVisible = game.totalPieces() > 0 ? 'visible' : 'hidden',
+            btnRegretStepOffVisible = game.totalRegretPieces() > 0 ? 'visible' : 'hidden'  
         this.$btnStepOff.style.visibility = btnStepOffVisible
         this.$btnRegretStepOff.style.visibility = btnRegretStepOffVisible
+        // css 标志棋盘当前由谁下，配合css hover after 实现下棋位置提示
+        var clsName = game.getCurrentPlayer().isBlack ? 'black-turn' : 'white-turn'
+        var clsList = this.$table.classList
+        clsList.remove('black-turn','white-turn')
+        clsList.add(clsName)
     }
 
     // 渲染单个棋子
     GameRenderer.prototype.reRenderPiece = function(piece,x,y) {
-        if(!this.$tds) {
+        if(this.$tds.length === 0) {
             // 缓存获取的DOM棋盘，防止多次获取
             this.$tds = [].slice.call(this.$el.querySelectorAll('td'))
         }
         var $td = this.$tds[ x * this.game.size + y]
         if(piece) {
             // 渲染下棋
-            $td.innerHTML = piece.isBlack ? 'X' : 'O'
+            $td.innerHTML = piece.isBlack ? '⚫' : '⚪'
+            $td.className = 'step-on'
         } else { 
             // 渲染悔棋
             $td.innerHTML = ''
+            $td.className = ''
         }
-        
+    }
+
+    // 渲染提示赢棋
+    GameRenderer.prototype.reRenderIndications = function(win) {
+        var game = this.game,that
+            currentPlayer = game.getCurrentPlayer()
+        this.$prevIndications.forEach(function($td) {
+            $td.classList.remove('win-indication')
+        })
+        if(!win) {
+            this.$prevIndications = currentPlayer.getWinIndications().map(function(pos){
+                var $td = this.$tds[ pos.x * this.game.size + pos.y]
+                $td.classList.add('win-indication')
+                return $td
+            }.bind(this))
+        }
     }
 
     exports.GameRenderer = GameRenderer

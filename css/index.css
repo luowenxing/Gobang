@@ -1,7 +1,5 @@
 .map {
 	border-collapse: collapse;
-    margin: 0 auto;
-    line-height: 29px;
 }
 .map tr {
 	height: 32px;
@@ -10,4 +8,32 @@
 	width: 29px;
     border: 1px solid #DFDFDF;
     text-align: center;
+    font-size: 20px;
+    position:relative;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+}
+.map tr td:hover, .map tr td.win-indication{
+	opacity: 0.6
+}
+.map tr td.step-on:hover,.map tr td.step-on{
+	opacity: 1 !important;
+}
+
+	
+.map tr td:hover::after,.map tr td.win-indication::after {
+	display:block;
+	position: absolute;
+	top:1px;
+	left:6px;
+}
+.map.black-turn tr td:hover::after,.map.black-turn tr td.win-indication::after {
+	content:"⚫";
+}
+.map.white-turn tr td:hover::after,.map.white-turn tr td.win-indication::after {
+	content:"⚪";
+}
+.map tr td.step-on:hover::after,.map tr td.step-on::after {
+	content:"" !important;
 }

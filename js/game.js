@@ -16,42 +16,57 @@
 		this.size = opt.size
 		this.board = new Board(opt.size)
 		this.status = GameStatus.Playing
-		this.steps = []
-        this.regretSteps = []
+		// 两个玩家
+		this.players = [new Player(this.board,true),new Player(this.board,false)]
+		// dom渲染器
 		this.renderer = new GameRenderer(this,opt.el)
 
-        // 仿vue数组变异方法
-        // steps一旦push/pop，则触发reRenderControl
-        var stepsWatch = arrayWatch(this.renderer.reRenderControl.bind(this.renderer))
-        this.steps.__proto__ = stepsWatch
-        this.regretSteps.__proto__ = stepsWatch
+		def(this,'stepsCount',this.renderer.reRenderControl.bind(this.renderer))
+		this.stepsCount = 0
 	}
 
 	Game.prototype.isPlaying = function() {
 		return this.status === GameStatus.Playing
 	}
 
-	Game.prototype.isTurnOfBlack = function() {
-		return this.steps.length % 2 === 0	
+	Game.prototype.getCurrentPlayer = function() {
+		let turn = this.stepsCount % 2 
+		return this.players[turn]
+	}
+
+	Game.prototype.getPrevPlayer = function() {
+		let turn = ( this.stepsCount - 1 ) % 2 
+		return this.players[turn]
+	}
+
+	Game.prototype.totalPieces = function() {
+		return this.players[0].pieces.length + this.players[1].pieces.length
+	}
+
+	Game.prototype.totalRegretPieces = function() {
+		return this.players[0].regretPieces.length + this.players[1].regretPieces.length
 	}
 
 	// 点击事件，下一步棋
-	Game.prototype.stepOn = function(x,y,checkWin) {
+	Game.prototype.stepOn = function(x,y) {
 		// 只有在游戏中时才能下棋
 		if(this.isPlaying()) {
-			var piece = this.board.setpOn(x,y,this.isTurnOfBlack())
+			var player = this.getCurrentPlayer()
+			var piece = player.stepOn(x,y)
 			// 点击空白处，成功走了一步棋
 			if(piece) {
-                this.steps.push({
-                    x:x,
-                    y:y
-                })
+				this.stepsCount ++
 				this.renderer.reRenderPiece(piece,x,y)
-				// 判断是否获胜
-				if(checkWin && this.board.checkWin(x,y)) {
-					alert( (piece.isBlack ? 'Black' : 'White') + 'Win')
+				if(this.board.checkWin(piece)) {
+					setTimeout(function() {
+						alert( (piece.isBlack ? 'Black' : 'White') + 'Win')
+					},100)
 					this.status = GameStatus.End
+					this.renderer.reRenderIndications(true)
+				} else {
+					this.renderer.reRenderIndications(false)
 				}
+				
 			}
 		}
 	}
@@ -59,21 +74,21 @@
     // 悔棋
     Game.prototype.stepOff = function() {
         if(this.isPlaying()) {
-            var step = this.steps.pop()
-            this.regretSteps.push(step)
-            this.board.stepOff(step.x,step.y)
-            this.renderer.reRenderPiece(null,step.x,step.y)
+            var player = this.getPrevPlayer()
+            var piece = player.stepOff()
+            this.stepsCount -- 
+            this.renderer.reRenderPiece(null,piece.x,piece.y)
         }
     }
 
     // 撤销悔棋
     Game.prototype.regretStepOff = function() {
         if(this.isPlaying()) {
-            var step = this.regretSteps.pop()
-            this.stepOn(step.x,step.y,false)
+        	var player = this.getCurrentPlayer()
+            var piece = player.regretStepOff()
+            this.stepOn(piece.x,piece.y,false)
         }
     }
-
 
 	exports.Game = Game
 })(window)
